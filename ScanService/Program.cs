@@ -6,9 +6,13 @@ namespace ScanService
     {
         static void Main(string[] args)
         {
-            
-            
-            Console.WriteLine("Hello World!");
+            if (args.Length != 1)
+            {
+                Console.WriteLine("No directory in arguments.");
+            }
+
+            var scanner = new DirectoryScanner();
+            scanner.Go(args[0]);
         }
     }
 }
