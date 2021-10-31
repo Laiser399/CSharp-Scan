@@ -14,7 +14,7 @@ namespace ScanService
     public class ScanWorker : BackgroundService
     {
         public const int ConnectionPort = 3993;
-        
+
         private readonly ILogger<ScanWorker> _logger;
         private readonly DirectoryScanner _scanner;
 
@@ -44,16 +44,20 @@ namespace ScanService
                         using var reader = new StreamReader(client.GetStream());
                         await using var writer = new StreamWriter(client.GetStream());
                         _logger.Log(LogLevel.Information, "New client accepted");
-                        
+
                         await HandleClient(reader, writer);
                         _logger.Log(LogLevel.Information, "Client handle done");
-                        
+
                         client.Close();
                         _logger.Log(LogLevel.Information, "Client closed");
                     }
                     catch (InvalidCastException e)
                     {
                         _logger.Log(LogLevel.Error, e, "Error on accept or handle");
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Log(LogLevel.Error, e, "Unknown error");
                     }
                 }
             }
@@ -91,7 +95,7 @@ namespace ScanService
                 await SimpleRestApi.ErrorAsync(writer, "Specified directory does not exists");
                 return;
             }
-                
+
             var task = Task.Run(() => _scanner.ScanDirectory(directory));
             _tasks.Add(task);
             await SimpleRestApi.OkAsync(writer, "TaskStarted",
