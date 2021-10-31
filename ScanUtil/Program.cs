@@ -130,7 +130,7 @@ namespace ScanUtil
                 }
                 else
                 {
-                    Console.WriteLine($"Received unknown response status from service: \"{responseStatus}\"");
+                    Console.WriteLine($"Received unknown response from service: \"{response}\"");
                 }
             }
             else
