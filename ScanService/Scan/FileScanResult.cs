@@ -1,6 +1,6 @@
-﻿namespace ScanService
+﻿namespace ScanService.Scan
 {
-    public enum ScanResult
+    public enum FileScanResult
     {
         ProblemsNotFound,
         Js,

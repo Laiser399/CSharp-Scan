@@ -1,21 +1,21 @@
-﻿namespace ScanService
+﻿namespace ScanService.Scan
 {
     public class SimpleFileContentScanner : IFileContentScanner
     {
         private readonly string _stringForCheck;
-        private readonly ScanResult _resultOnContains;
+        private readonly FileScanResult _resultOnContains;
 
-        public SimpleFileContentScanner(string stringForCheck, ScanResult resultOnContains)
+        public SimpleFileContentScanner(string stringForCheck, FileScanResult resultOnContains)
         {
             _stringForCheck = stringForCheck;
             _resultOnContains = resultOnContains;
         }
 
-        public ScanResult Scan(string fileContent)
+        public FileScanResult Scan(string fileContent)
         {
             return fileContent.Contains(_stringForCheck) 
                 ? _resultOnContains 
-                : ScanResult.ProblemsNotFound;
+                : FileScanResult.ProblemsNotFound;
         }
     }
 }
