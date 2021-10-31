@@ -21,18 +21,16 @@ namespace ScanUtil
 
             if (command == "scan")
             {
-                OnScanCommand(args[1]);
+                WrapConnection((r, w) => OnScanCommand(r, w, args[1]));
             }
             else if (command == "status")
             {
-                if (int.TryParse(args[1], out var taskId))
-                {
-                    OnStatusCommand(taskId);
-                }
-                else
+                if (!int.TryParse(args[1], out var taskId))
                 {
                     Console.WriteLine("Error on parse second argument - taskId.");
                 }
+                
+                WrapConnection((r, w) => OnStatusCommand(r, w, taskId));
             }
             else
             {
@@ -40,14 +38,26 @@ namespace ScanUtil
             }
         }
 
-        private static void OnScanCommand(string dirPath)
+        private static void WrapConnection(Action<StreamReader, StreamWriter> onConnected)
         {
-            using var client = new TcpClient();
-            client.Connect(IPAddress.Loopback, ScanWorker.ConnectionPort);
+            try
+            {
+                using var client = new TcpClient();
+                client.Connect(IPAddress.Loopback, ScanWorker.ConnectionPort);
 
-            using var reader = new StreamReader(client.GetStream());
-            using var writer = new StreamWriter(client.GetStream());
-            
+                using var reader = new StreamReader(client.GetStream());
+                using var writer = new StreamWriter(client.GetStream());
+
+                onConnected(reader, writer);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine($"Error connect to service: {e.Message}");
+            }
+        }
+
+        private static void OnScanCommand(TextReader reader, TextWriter writer, string dirPath)
+        {
             writer.WriteLine("scan");
             writer.WriteLine(dirPath);
             writer.Flush();
@@ -82,14 +92,8 @@ namespace ScanUtil
             }
         }
 
-        private static void OnStatusCommand(int taskId)
+        private static void OnStatusCommand(TextReader reader, TextWriter writer, int taskId)
         {
-            using var client = new TcpClient();
-            client.Connect(IPAddress.Loopback, ScanWorker.ConnectionPort);
-
-            using var reader = new StreamReader(client.GetStream());
-            using var writer = new StreamWriter(client.GetStream());
-            
             writer.WriteLine("status");
             writer.WriteLine(taskId);
             writer.Flush();
